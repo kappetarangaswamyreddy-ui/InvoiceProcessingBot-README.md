@@ -18,3 +18,15 @@
 - **End:** summary logs (ready to extend with email/slack).
 
 ## 📁 Folder structure
+ProjectRoot/
+├─ Main.xaml
+├─ Framework/ # default REFramework files
+├─ Config/ or Data/
+│ └─ Config.xlsx # Settings/Constants/Assets
+├─ Input/ # put sample invoice PDFs here
+├─ Output/
+│ ├─ Invoices_Processed.xlsx # auto-created
+│ └─ Invoices_Errors.xlsx # auto-created
+└─ Archive/
+├─ Success/
+└─ Failed/
