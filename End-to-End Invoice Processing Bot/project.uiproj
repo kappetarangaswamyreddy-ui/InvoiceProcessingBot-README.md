@@ -1,0 +1,6 @@
+{
+  "Name": "End-to-End Invoice Processing Bot",
+  "ProjectType": "Process",
+  "Description": "Read invoices → Extract key data → Validate → Upload to system.",
+  "MainFile": "Main.xaml"
+}
