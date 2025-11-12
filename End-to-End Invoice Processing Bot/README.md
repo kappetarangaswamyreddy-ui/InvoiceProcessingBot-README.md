@@ -1,39 +1,50 @@
-### Documentation is included in the Documentation folder ###
 
+> **Tip:** In some setups, `Data/` is used instead of `Config/`. Both are supported—just update `in_ConfigFile` in `Main.xaml`.
 
-### REFrameWork Template ###
-**Robotic Enterprise Framework**
+## ⚙️ Config.xlsx (Settings sheet)
+| Name                | Example Value                         | Notes |
+|---------------------|---------------------------------------|------|
+| InputFolder         | `Input` or `Data\Input`               | Folder with PDFs |
+| OutputProcessedFile | `Output\Invoices_Processed.xlsx`      | Valid invoices |
+| OutputErrorFile     | `Output\Invoices_Errors.xlsx`         | Invalid invoices |
+| SuccessFolder       | `Archive\Success`                     | Archive OK |
+| FailedFolder        | `Archive\Failed`                      | Archive bad |
+| InvoiceFilePattern  | `*.pdf`                               | PDF filter |
 
-* Built on top of *Transactional Business Process* template
-* Uses *State Machine* layout for the phases of automation project
-* Offers high level logging, exception handling and recovery
-* Keeps external settings in *Config.xlsx* file and Orchestrator assets
-* Pulls credentials from Orchestrator assets and *Windows Credential Manager*
-* Gets transaction data from Orchestrator queue and updates back status
-* Takes screenshots in case of system exceptions
+## 🚀 How to run
+1. Open the solution in **UiPath Studio** (REFramework template).
+2. In `Main.xaml` → set `in_ConfigFile` default to `Data\Config.xlsx`.
+3. I drop 10 sample PDFs into **Input**.
+4. **Run**. Watch Output panel for logs.
 
+## ✅ Validation rules (sample)
+- VendorName, InvoiceNumber, InvoiceDate, TotalAmount are required.
+- TotalAmount must be > 0.
+- If any required field missing → row goes to **Errors** and PDF → `Archive/Failed`.
 
-### How It Works ###
+## 🧪 Test data
+- You can generate dummy invoices or use the included samples (`/Input`).
+- For OCR variance, use mixed fonts or lightly noisy scans.
 
-1. **INITIALIZE PROCESS**
- + ./Framework/*InitiAllSettings* - Load configuration data from Config.xlsx file and from assets
- + ./Framework/*GetAppCredential* - Retrieve credentials from Orchestrator assets or local Windows Credential Manager
- + ./Framework/*InitiAllApplications* - Open and login to applications used throughout the process
+## 🛠️ Troubleshooting
+- **“Folder does not exist”**: ensure `Input/Output/Archive` match `Config.xlsx`.
+- **Excel lock errors**: don’t mix Classic Workbook inside **Use Excel File**; keep to Modern Excel activities.
+- **Move File error**: ensure Move File is **outside** `Use Excel File` scope; verify `Archive/…` folders exist.
+- **Path is null**: ensure `in_TransactionItem` is mapped and `Read PDF with OCR` FileName = `in_TransactionItem`.
 
-2. **GET TRANSACTION DATA**
- + ./Framework/*GetTransactionData* - Fetches transactions from an Orchestrator queue defined by Config("OrchestratorQueueName") or any other configured data source
+## 🗺️ Roadmap
+- **v2:** Orchestrator **Queues** (Dispatcher/Performer pattern)
+- **v3:** **API** push into ERP/Accounting system
+- **v4:** **AI Center** skill for smarter field extraction
+- **v5:** DU **ML Extractor**, human validation station, confidence thresholds
 
-3. **PROCESS TRANSACTION**
- + *Process* - Process trasaction and invoke other workflows related to the process being automated 
- + ./Framework/*SetTransactionStatus* - Updates the status of the processed transaction (Orchestrator transactions by default): Success, Business Rule Exception or System Exception
+## 🗣️ Interview crib notes
+- “Each transaction = single PDF; **Config-driven** paths; OCR + Regex; **validation layer**; Excel append; **archive policy**; handled business vs system exceptions within **REFramework**.”
 
-4. **END PROCESS**
- + ./Framework/*CloseAllApplications* - Logs out and closes applications used throughout the process
+## 📷 Screenshots (add yours)
+- `docs/flow-overview.png`
+- `docs/reframework-states.png`
+- `docs/output-excel.png`
 
-
-### For New Project ###
-
-1. Check the Config.xlsx file and add/customize any required fields and values
-2. Implement InitiAllApplications.xaml and CloseAllApplicatoins.xaml workflows, linking them in the Config.xlsx fields
-3. Implement GetTransactionData.xaml and SetTransactionStatus.xaml according to the transaction type being used (Orchestrator queues by default)
-4. Implement Process.xaml workflow and invoke other workflows related to the process being automated
+## 📄 License
+MIT — free to use and adapt. See `LICENSE`.
