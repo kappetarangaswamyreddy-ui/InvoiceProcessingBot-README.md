@@ -1,50 +1,95 @@
+## ⚙️ My Configuration Setup (Config.xlsx)
 
-> **Tip:** In some setups, `Data/` is used instead of `Config/`. Both are supported—just update `in_ConfigFile` in `Main.xaml`.
+For this project, I created a centralized **Config.xlsx** file to control all input, output, and archive paths dynamically.  
+This helps the bot stay flexible and portable — I can move the entire folder anywhere, and the automation still works without hardcoded paths.
 
-## ⚙️ Config.xlsx (Settings sheet)
-| Name                | Example Value                         | Notes |
-|---------------------|---------------------------------------|------|
-| InputFolder         | `Input` or `Data\Input`               | Folder with PDFs |
-| OutputProcessedFile | `Output\Invoices_Processed.xlsx`      | Valid invoices |
-| OutputErrorFile     | `Output\Invoices_Errors.xlsx`         | Invalid invoices |
-| SuccessFolder       | `Archive\Success`                     | Archive OK |
-| FailedFolder        | `Archive\Failed`                      | Archive bad |
-| InvoiceFilePattern  | `*.pdf`                               | PDF filter |
+| Name | Example Value | Description |
+|------|----------------|-------------|
+| InputFolder | `Data\Input` | Folder where invoice PDFs are stored |
+| OutputProcessedFile | `Data\Output\Invoices_Processed.xlsx` | File where valid invoices are written |
+| OutputErrorFile | `Data\Output\Invoices_Errors.xlsx` | File where invalid invoices are written |
+| SuccessFolder | `Data\Archive\Success` | Folder for successfully processed PDFs |
+| FailedFolder | `Data\Archive\Failed` | Folder for failed or incomplete PDFs |
+| InvoiceFilePattern | `*.pdf` | Used to pick all invoice files from Input |
 
-## 🚀 How to run
-1. Open the solution in **UiPath Studio** (REFramework template).
-2. In `Main.xaml` → set `in_ConfigFile` default to `Data\Config.xlsx`.
-3. I drop 10 sample PDFs into **Input**.
-4. **Run**. Watch Output panel for logs.
+---
 
-## ✅ Validation rules (sample)
-- VendorName, InvoiceNumber, InvoiceDate, TotalAmount are required.
-- TotalAmount must be > 0.
-- If any required field missing → row goes to **Errors** and PDF → `Archive/Failed`.
+## 🚀 How I Built & Run This Bot
 
-## 🧪 Test data
-- You can generate dummy invoices or use the included samples (`/Input`).
-- For OCR variance, use mixed fonts or lightly noisy scans.
+I developed this automation using **UiPath REFramework** from scratch.  
+Each transaction represents a single invoice PDF.
 
-## 🛠️ Troubleshooting
-- **“Folder does not exist”**: ensure `Input/Output/Archive` match `Config.xlsx`.
-- **Excel lock errors**: don’t mix Classic Workbook inside **Use Excel File**; keep to Modern Excel activities.
-- **Move File error**: ensure Move File is **outside** `Use Excel File` scope; verify `Archive/…` folders exist.
-- **Path is null**: ensure `in_TransactionItem` is mapped and `Read PDF with OCR` FileName = `in_TransactionItem`.
+1. Opened the project in **UiPath Studio** (based on the REFramework template).  
+2. Set the `in_ConfigFile` argument in **Main.xaml** to point to my Config file (`Data\Config.xlsx`).  
+3. Added 10 sample invoices inside the **Input** folder.  
+4. Clicked **Run** — the bot automatically:
+   - Reads each PDF using **Read PDF with OCR**.  
+   - Extracts key fields with **Regex** (VendorName, InvoiceNo, Date, Subtotal, Tax, Total).  
+   - Validates all mandatory fields.  
+   - Appends clean data into **Invoices_Processed.xlsx**.  
+   - Logs invalid invoices into **Invoices_Errors.xlsx**.  
+   - Moves each file into the correct **Archive** folder (Success/Failed).  
 
-## 🗺️ Roadmap
-- **v2:** Orchestrator **Queues** (Dispatcher/Performer pattern)
-- **v3:** **API** push into ERP/Accounting system
-- **v4:** **AI Center** skill for smarter field extraction
-- **v5:** DU **ML Extractor**, human validation station, confidence thresholds
+Everything (paths, patterns, file names) is **Config-driven**, so there’s zero hardcoding.
 
-## 🗣️ Interview crib notes
-- “Each transaction = single PDF; **Config-driven** paths; OCR + Regex; **validation layer**; Excel append; **archive policy**; handled business vs system exceptions within **REFramework**.”
+---
 
-## 📷 Screenshots (add yours)
-- `docs/flow-overview.png`
-- `docs/reframework-states.png`
-- `docs/output-excel.png`
+## ✅ My Validation Rules
+
+During processing, the bot applies simple but strong validation to ensure data accuracy:
+
+- **VendorName**, **InvoiceNumber**, **InvoiceDate**, and **TotalAmount** are mandatory.  
+- **TotalAmount** must be greater than 0.  
+- Missing or invalid data moves the file to **Archive/Failed** and logs the reason in **Invoices_Errors.xlsx**.  
+- Valid invoices go to **Archive/Success** and are appended in **Invoices_Processed.xlsx**.
+
+---
+
+## 🧪 My Test Data Setup
+
+I used 10 sample invoice PDFs — a mix of:
+- Text-based and scanned invoices (to test OCR reliability).  
+- Different vendors and formats.  
+- A few intentionally incomplete invoices to test validation and exception handling.
+
+The goal was to simulate a real-world environment where not every invoice is perfect.
+
+---
+
+## 🛠️ Challenges I Solved
+
+While creating this end-to-end automation, I encountered and fixed several real issues:
+
+| Issue | Cause | My Solution |
+|-------|--------|-------------|
+| **Folder does not exist** | Folder path didn’t match Config.xlsx | Created missing folders manually and verified Config values |
+| **Excel file locked** | Used Workbook activity inside Modern Excel scope | Switched fully to **Modern Excel** activities |
+| **Move File error** | File was still open when moving | Moved PDF **outside** the Excel scope |
+| **Null path in OCR** | Argument not mapped correctly | Mapped `in_TransactionItem` properly in Main.xaml |
+
+Each fix taught me how to handle exceptions gracefully and design resilient UiPath workflows.
+
+---
+
+## 🗺️ Future Enhancements
+
+In the next version, I plan to extend this automation with:
+- **Orchestrator Queues (Dispatcher/Performer)** for large-scale processing.  
+- **API integration** to push invoice data into accounting systems.  
+- **AI Center / ML Extractor** for smart, layout-independent field detection.  
+- **Email or Teams notifications** after each batch run.  
+
+---
+
+## 🗣️ My Personal Project Summary
+
+> “I personally developed this End-to-End Invoice Processing Bot using UiPath REFramework.  
+> It automates reading invoice PDFs, extracting data with OCR and Regex, validating information, and organizing outputs into structured Excel sheets.  
+> I implemented Config-driven architecture, error handling, logging, and auto-archiving to make it production-ready.  
+> This project demonstrates my understanding of **RPA development**, **REFramework**, **Document Understanding**, and **end-to-end process automation**.”
+
+---
 
 ## 📄 License
-MIT — free to use and adapt. See `LICENSE`.
+
+This project is licensed under the **MIT License** — free to use, modify, and share for learning or portfolio purposes.
